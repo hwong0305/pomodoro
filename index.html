@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <title>Pomodoro</title>
+    <style>
+      body {
+        background: rgb(36, 52, 70);
+        color: rgb(215, 215, 215);
+      }
+      .timer {
+        background: inherit;
+        text-align: center;
+      }
+      .time-controls {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #time {
+        color: rgb(247, 199, 68);
+      }
+      .pomodoro__status {
+        border: solid 1px rgb(215, 215, 215);
+        background: rgb(36, 52, 70);
+        color: rgb(215, 215, 215);
+      }
+      .pomodoro__status:hover {
+        background: inherit;
+        color: rgb(247, 199, 68);
+      }
+      .pomodoro__status__button-active {
+        color: rgb(247, 199, 68);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="mt-5 d-flex justify-content-center">
+        <ul class="pagination">
+          <li class="page-item">
+            <button
+              class="page-link pomodoro__status pomodoro__status__button-active"
+            >
+              Working
+            </button>
+          </li>
+          <li class="page-item">
+            <button class="page-link pomodoro__status">Short Break</button>
+          </li>
+          <li class="page-item">
+            <button class="page-link pomodoro__status">Long Break</button>
+          </li>
+        </ul>
+      </div>
+      <div class="jumbotron timer">
+        <h2 class="display-1" id="time">25:00</h2>
+      </div>
+      <div class="time-controls">
+        <div class="btn-group btn-group-lg" role="group">
+          <button class="btn btn-primary" id="start">Start</button>
+          <button class="btn btn-danger" id="pause">Pause</button>
+          <button class="btn btn-secondary" id="reset">Reset</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      let status = 'working';
+      let interval;
+      let timer;
+      const TWENTYFIVE_MINUTES = 1000 * 60 * 25;
+      const FIVE_MINUTES = 1000 * 60 * 5;
+      const TEN_MINUTES = 1000 * 60 * 10;
+      const timeElement = document.getElementById('time');
+      const start = document.getElementById('start');
+      const pause = document.getElementById('pause');
+      const reset = document.getElementById('reset');
+
+      const pomodoroStatusGroup = document.querySelectorAll('.page-link');
+
+      const setActive = text => {
+        pomodoroStatusGroup.forEach(e => {
+          if (e.innerText !== text) {
+            e.classList = 'page-link pomodoro__status';
+          } else {
+            e.classList =
+              'page-link pomodoro__status pomodoro__status__button-active';
+          }
+          clearInterval(interval);
+          clearTimeout(timer);
+          status = text;
+          setTime();
+        });
+      };
+
+      pomodoroStatusGroup.forEach(e => {
+        e.onclick = () => setActive(e.innerText);
+      });
+
+      const convertTime = time => {
+        if (time === 0) return '00';
+        if (time === 1) return '01';
+        if (time === 2) return '02';
+        if (time === 3) return '03';
+        if (time === 4) return '04';
+        if (time === 5) return '05';
+        if (time === 6) return '06';
+        if (time === 7) return '07';
+        if (time === 8) return '08';
+        if (time === 9) return '09';
+        return time;
+      };
+
+      const startPomodoro = () => {
+        const [minute, second] = timeElement.innerText.split(':');
+        const remaining = Number(minute) * 60 * 1000 + Number(second) * 1000;
+        const finishTime = remaining + new Date().getTime();
+        interval = setInterval(() => {
+          const current = new Date().getTime();
+          const remain = (finishTime - current) / 1000;
+          timeElement.innerText = `${convertTime(
+            Math.floor(remain / 60)
+          )}:${convertTime(Math.floor(remain % 60))}`;
+        }, 500);
+        timer = setTimeout(() => clearInterval(interval), remaining);
+      };
+
+      const pausePomodoro = () => {
+        clearInterval(interval);
+        clearTimeout(timer);
+        interval = null;
+        timer = null;
+      };
+
+      const setTime = () => {
+        if (status === 'Working') {
+          time.innerText = '25:00';
+        } else if (status === 'Short Break') {
+          time.innerText = '05:00';
+        } else {
+          time.innerText = '10:00';
+        }
+      };
+
+      start.onclick = startPomodoro;
+      pause.onclick = pausePomodoro;
+      reset.onclick = () => {
+        if (interval) {
+          pausePomodoro();
+          setTime();
+          startPomodoro();
+        } else {
+          setTime();
+        }
+      };
+    </script>
+  </body>
+</html>
